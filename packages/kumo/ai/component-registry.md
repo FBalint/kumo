@@ -4032,4 +4032,4 @@ Multi-line textarea input with Input variants and InputArea-specific dimensions
 - **Navigation:** CommandPalette, MenuBar, Pagination, Tabs
 - **Overlay:** Dialog, DropdownMenu, Popover, Tooltip
 - **Layout:** Grid, Surface, PageHeader, ResourceListPage
-- **Other:** Label, Link, SensitiveInput, Table
+- **Other:** Label, Link, SensitiveInput, Table, DeleteResource
