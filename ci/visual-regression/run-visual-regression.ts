@@ -1,0 +1,414 @@
+#!/usr/bin/env tsx
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  SCREENSHOT_CONFIGS,
+  getAffectedScreenshots,
+  type ScreenshotConfig,
+} from "./page-config";
+
+const WORKER_URL =
+  process.env.SCREENSHOT_WORKER_URL ??
+  "https://kumo-screenshot-worker.design-engineering.workers.dev";
+const SCREENSHOTS_DIR = "ci/visual-regression/screenshots";
+const API_KEY = process.env.SCREENSHOT_API_KEY ?? "";
+
+interface ScreenshotResult {
+  url: string;
+  image: string;
+  error?: string;
+}
+
+interface WorkerResponse {
+  results: ScreenshotResult[];
+}
+
+interface ComparisonResult {
+  id: string;
+  name: string;
+  beforeUrl: string;
+  afterUrl: string;
+  changed: boolean;
+}
+
+function getChangedFiles(): string[] {
+  try {
+    const base = process.env.GITHUB_BASE_REF ?? "main";
+    const output = execSync(`git diff --name-only origin/${base}...HEAD`, {
+      encoding: "utf-8",
+    });
+    return output.trim().split("\n").filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function ensureDir(dir: string): void {
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+}
+
+async function uploadImageToGitHub(
+  imageBuffer: Buffer,
+  filename: string,
+): Promise<string> {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY ?? "cloudflare/kumo";
+  const prNumber = process.env.GITHUB_PR_NUMBER ?? process.env.PR_NUMBER;
+  const runId = process.env.GITHUB_RUN_ID ?? Date.now().toString();
+
+  if (!token) {
+    throw new Error("GITHUB_TOKEN required for image upload");
+  }
+
+  const [owner, repoName] = repo.split("/");
+  const branch = `vr-screenshots-${prNumber}-${runId}`;
+  const path = `screenshots/${filename}`;
+
+  const mainRef = await fetch(
+    `https://api.github.com/repos/${owner}/${repoName}/git/ref/heads/main`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+  const mainData = (await mainRef.json()) as { object: { sha: string } };
+  const baseSha = mainData.object.sha;
+
+  const refCheck = await fetch(
+    `https://api.github.com/repos/${owner}/${repoName}/git/ref/heads/${branch}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+
+  if (refCheck.status === 404) {
+    await fetch(`https://api.github.com/repos/${owner}/${repoName}/git/refs`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ref: `refs/heads/${branch}`,
+        sha: baseSha,
+      }),
+    });
+  }
+
+  const content = imageBuffer.toString("base64");
+
+  const existingFile = await fetch(
+    `https://api.github.com/repos/${owner}/${repoName}/contents/${path}?ref=${branch}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+
+  const existingData = existingFile.ok
+    ? ((await existingFile.json()) as { sha?: string })
+    : null;
+
+  await fetch(
+    `https://api.github.com/repos/${owner}/${repoName}/contents/${path}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: `Visual regression: ${filename}`,
+        content,
+        branch,
+        ...(existingData?.sha ? { sha: existingData.sha } : {}),
+      }),
+    },
+  );
+
+  return `https://raw.githubusercontent.com/${owner}/${repoName}/${branch}/${path}`;
+}
+
+async function captureScreenshots(
+  baseUrl: string,
+  configs: ScreenshotConfig[],
+  outputDir: string,
+  prefix: string,
+): Promise<Map<string, { path: string; url: string | null }>> {
+  ensureDir(outputDir);
+  const screenshots = new Map<string, { path: string; url: string | null }>();
+
+  const requests = configs.map((config) => ({
+    url: config.url,
+    viewport: config.viewport,
+    actions: config.actions,
+    fullPage: true,
+    hideSidebar: true,
+    _meta: { id: config.id, name: config.name },
+  }));
+
+  console.log(`Capturing ${requests.length} screenshot(s) from ${baseUrl}...`);
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (API_KEY) {
+    headers["X-API-Key"] = API_KEY;
+  }
+
+  const response = await fetch(`${WORKER_URL}/batch`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      baseUrl,
+      pages: requests,
+      viewport: { width: 1440, height: 900 },
+      hideSidebar: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Worker request failed: ${response.status} - ${text}`);
+  }
+
+  const data = (await response.json()) as WorkerResponse;
+
+  for (let i = 0; i < data.results.length; i++) {
+    const result = data.results[i];
+    const meta = requests[i]._meta;
+    const filename = `${prefix}-${meta.id}.png`;
+    const filepath = join(outputDir, filename);
+
+    if (result.error) {
+      console.warn(`  Error: ${meta.name}: ${result.error}`);
+      continue;
+    }
+
+    if (!result.image) {
+      console.warn(`  Empty: ${meta.name}`);
+      continue;
+    }
+
+    const imageBuffer = Buffer.from(result.image, "base64");
+    writeFileSync(filepath, imageBuffer);
+
+    let imageUrl: string | null = null;
+    try {
+      imageUrl = await uploadImageToGitHub(imageBuffer, filename);
+      console.log(`  OK: ${meta.name} -> ${imageUrl}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("GITHUB_TOKEN required")) {
+        console.log(`  OK: ${meta.name} (local only, no GITHUB_TOKEN)`);
+      } else {
+        console.error(`  Upload failed for ${meta.name}: ${msg}`);
+      }
+    }
+
+    screenshots.set(meta.id, { path: filepath, url: imageUrl });
+  }
+
+  return screenshots;
+}
+
+function compareImages(beforePath: string, afterPath: string): boolean {
+  if (!existsSync(beforePath) || !existsSync(afterPath)) {
+    return true;
+  }
+
+  const before = readFileSync(beforePath);
+  const after = readFileSync(afterPath);
+
+  return !before.equals(after);
+}
+
+function generateMarkdownReport(comparisons: ComparisonResult[]): string {
+  const changed = comparisons.filter((c) => c.changed);
+  const unchanged = comparisons.filter((c) => !c.changed);
+
+  const lines: string[] = [
+    "<!-- kumo-visual-regression -->",
+    "## Visual Regression Report",
+    "",
+  ];
+
+  if (changed.length === 0) {
+    lines.push("No visual changes detected.");
+    return lines.join("\n");
+  }
+
+  lines.push(`**${changed.length} screenshot(s) with visual changes:**`);
+  lines.push("");
+
+  for (const comp of changed) {
+    lines.push(`### ${comp.name}`);
+    lines.push("");
+    lines.push("| Before | After |");
+    lines.push("|--------|-------|");
+    lines.push(`| ![Before](${comp.beforeUrl}) | ![After](${comp.afterUrl}) |`);
+    lines.push("");
+  }
+
+  if (unchanged.length > 0) {
+    lines.push("<details>");
+    lines.push(
+      `<summary>${unchanged.length} screenshot(s) unchanged</summary>`,
+    );
+    lines.push("");
+    unchanged.forEach((c) => lines.push(`- ${c.name}`));
+    lines.push("</details>");
+  }
+
+  lines.push("");
+  lines.push("---");
+  lines.push("*Generated by Kumo Visual Regression*");
+
+  return lines.join("\n");
+}
+
+async function postPRComment(body: string): Promise<void> {
+  const token = process.env.GITHUB_TOKEN;
+  const prNumber = process.env.GITHUB_PR_NUMBER ?? process.env.PR_NUMBER;
+  const repo = process.env.GITHUB_REPOSITORY ?? "cloudflare/kumo";
+
+  if (!token || !prNumber) {
+    console.log("Missing GITHUB_TOKEN or PR_NUMBER, skipping PR comment");
+    console.log("\n--- Report ---\n");
+    console.log(body);
+    return;
+  }
+
+  const [owner, repoName] = repo.split("/");
+  const marker = "<!-- kumo-visual-regression -->";
+
+  const commentsResponse = await fetch(
+    `https://api.github.com/repos/${owner}/${repoName}/issues/${prNumber}/comments`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+
+  const comments = (await commentsResponse.json()) as Array<{
+    id: number;
+    body?: string;
+  }>;
+  const existingComment = comments.find((c) => c.body?.startsWith(marker));
+
+  const url = existingComment
+    ? `https://api.github.com/repos/${owner}/${repoName}/issues/comments/${existingComment.id}`
+    : `https://api.github.com/repos/${owner}/${repoName}/issues/${prNumber}/comments`;
+
+  const method = existingComment ? "PATCH" : "POST";
+
+  await fetch(url, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github.v3+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ body }),
+  });
+
+  console.log(`PR comment ${existingComment ? "updated" : "created"}`);
+}
+
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const fullRegression = args.includes("--full");
+
+  const beforeUrl = process.env.BEFORE_URL ?? "https://kumo-ui.com";
+  const afterUrl =
+    process.env.AFTER_URL ?? process.env.PREVIEW_URL ?? beforeUrl;
+
+  let configs: ScreenshotConfig[];
+
+  if (fullRegression) {
+    configs = SCREENSHOT_CONFIGS;
+    console.log(
+      `Running full visual regression (${configs.length} screenshots)...\n`,
+    );
+  } else {
+    const changedFiles = getChangedFiles();
+    configs = getAffectedScreenshots(changedFiles);
+
+    if (configs.length === 0) {
+      console.log(
+        "No relevant file changes detected. Skipping visual regression.",
+      );
+      return;
+    }
+
+    console.log(`Found ${configs.length} affected screenshot(s)\n`);
+  }
+
+  const beforeDir = join(SCREENSHOTS_DIR, "before");
+  const afterDir = join(SCREENSHOTS_DIR, "after");
+
+  console.log("=== Capturing BEFORE screenshots ===");
+  const beforeScreenshots = await captureScreenshots(
+    beforeUrl,
+    configs,
+    beforeDir,
+    "before",
+  );
+
+  console.log("\n=== Capturing AFTER screenshots ===");
+  const afterScreenshots = await captureScreenshots(
+    afterUrl,
+    configs,
+    afterDir,
+    "after",
+  );
+
+  console.log("\n=== Comparing screenshots ===");
+  const comparisons: ComparisonResult[] = [];
+
+  for (const config of configs) {
+    const before = beforeScreenshots.get(config.id);
+    const after = afterScreenshots.get(config.id);
+
+    if (!before || !after) continue;
+    if (!before.url || !after.url) {
+      console.log(`  ${config.name}: skipped (upload failed)`);
+      continue;
+    }
+
+    const changed = compareImages(before.path, after.path);
+
+    comparisons.push({
+      id: config.id,
+      name: config.name,
+      beforeUrl: before.url,
+      afterUrl: after.url,
+      changed,
+    });
+
+    console.log(`  ${config.name}: ${changed ? "CHANGED" : "unchanged"}`);
+  }
+
+  console.log("\n=== Generating report ===");
+  const report = generateMarkdownReport(comparisons);
+  await postPRComment(report);
+}
+
+main().catch((error) => {
+  console.error("Visual regression failed:", error);
+  process.exit(1);
+});
