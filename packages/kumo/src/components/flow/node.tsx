@@ -5,21 +5,22 @@ import {
   isValidElement,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ReactElement,
-  type ReactNode
-} from 'react';
-import { useNode, type RectLike } from './diagram';
+  type ReactNode,
+} from "react";
+import { useNode, type RectLike } from "./diagram";
 
 // Utility to merge refs
 function mergeRefs<T>(
   ...refs: (React.Ref<T> | undefined)[]
 ): React.RefCallback<T> {
-  return value => {
-    refs.forEach(ref => {
-      if (typeof ref === 'function') {
+  return (value) => {
+    refs.forEach((ref) => {
+      if (typeof ref === "function") {
         ref(value);
       } else if (ref != null) {
         (ref as React.MutableRefObject<T | null>).current = value;
@@ -43,6 +44,11 @@ function mergeRefs<T>(
  */
 export type FlowNodeProps = {
   /**
+   * Optional identifier for the node. When provided, used as the
+   * `data-node-id` attribute instead of the auto-generated React id.
+   */
+  id?: string;
+  /**
    * Custom element to render instead of the default styled node.
    * When provided, completely replaces the default element.
    */
@@ -55,7 +61,7 @@ export type FlowNodeProps = {
 };
 
 export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
-  function FlowNode({ render, children, disabled = false }, ref) {
+  function FlowNode({ id: idProp, render, children, disabled = false }, ref) {
     const nodeRef = useRef<HTMLElement>(null);
     const startAnchorRef = useRef<HTMLElement | null>(null);
     const endAnchorRef = useRef<HTMLElement | null>(null);
@@ -68,22 +74,17 @@ export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
       () => ({
         parallel: false,
         disabled,
-        ...measurements
+        ...measurements,
       }),
-      [measurements, disabled]
+      [measurements, disabled],
     );
 
-    const { index, id } = useNode(nodeProps);
+    const { index, id } = useNode(nodeProps, idProp);
 
-    /**
-     * This effect intentionally has no dependencies because we want it to run on
-     * every render to ensure measurements are always up to date.
-     */
-    useEffect(() => {
+    const remeasure = () => {
       if (!nodeRef.current) return;
 
-      const rect = nodeRef.current.getBoundingClientRect();
-      const nodeRect = rect;
+      const nodeRect = nodeRef.current.getBoundingClientRect();
 
       let startRect: RectLike = nodeRect;
       let endRect: RectLike = nodeRect;
@@ -96,12 +97,30 @@ export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
         endRect = endAnchorRef.current.getBoundingClientRect();
       }
 
-      setMeasurements(m => {
+      setMeasurements((m) => {
         const newVal = { start: startRect, end: endRect };
         if (JSON.stringify(m) === JSON.stringify(newVal)) return m;
         return newVal;
       });
-    });
+    };
+
+    /**
+     * This effect intentionally has no dependencies because we want it to run on
+     * every render to ensure measurements are always up to date.
+     */
+    useLayoutEffect(remeasure);
+
+    /**
+     * Observe the node element for size changes so that connectors update even
+     * when FlowNode itself does not re-render (e.g. an expandable render-prop
+     * child toggling its own state).
+     */
+    useLayoutEffect(() => {
+      if (!nodeRef.current) return;
+      const observer = new ResizeObserver(remeasure);
+      observer.observe(nodeRef.current);
+      return () => observer.disconnect();
+    }, []);
 
     const mergedRef = mergeRefs(ref, nodeRef);
 
@@ -111,13 +130,15 @@ export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
       const renderProps = render.props as {
         children?: ReactNode;
         style?: React.CSSProperties;
+        "data-testid"?: string;
       };
       element = cloneElement(render, {
         ref: mergedRef,
-        'data-node-index': index,
-        'data-node-id': id,
-        style: { cursor: 'default', ...renderProps.style },
-        children: renderProps.children ?? children
+        "data-node-index": index,
+        "data-node-id": id,
+        "data-testid": renderProps["data-testid"] ?? id,
+        style: { cursor: "default", ...renderProps.style },
+        children: renderProps.children ?? children,
       } as React.HTMLAttributes<HTMLElement> & { ref: React.Ref<HTMLElement> });
     } else {
       // Default element
@@ -125,9 +146,10 @@ export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
         <li
           ref={mergedRef}
           className="py-2 px-3 rounded-md shadow bg-kumo-base ring ring-kumo-line"
-          style={{ cursor: 'default' }}
+          style={{ cursor: "default" }}
           data-node-index={index}
           data-node-id={id}
+          data-testid={id}
         >
           {children}
         </li>
@@ -138,23 +160,23 @@ export const FlowNode = forwardRef<HTMLElement, FlowNodeProps>(
       <FlowNodeAnchorContext.Provider
         value={useMemo(
           () => ({
-            registerStartAnchor: anchorRef => {
+            registerStartAnchor: (anchorRef) => {
               startAnchorRef.current = anchorRef;
             },
-            registerEndAnchor: anchorRef => {
+            registerEndAnchor: (anchorRef) => {
               endAnchorRef.current = anchorRef;
-            }
+            },
           }),
-          []
+          [],
         )}
       >
         {element}
       </FlowNodeAnchorContext.Provider>
     );
-  }
+  },
 );
 
-FlowNode.displayName = 'Flow.Node';
+FlowNode.displayName = "Flow.Node";
 
 type FlowNodeAnchorContextType = {
   registerStartAnchor: (ref: HTMLElement | null) => void;
@@ -162,7 +184,7 @@ type FlowNodeAnchorContextType = {
 };
 
 const FlowNodeAnchorContext = createContext<FlowNodeAnchorContextType | null>(
-  null
+  null,
 );
 
 /**
@@ -184,7 +206,7 @@ export type FlowAnchorProps = {
    * _next_ connector or the "end" point for the _previous_ connector.
    * When omitted, it serves as both the start and end points.
    */
-  type?: 'start' | 'end';
+  type?: "start" | "end";
   /**
    * Custom element to render instead of the default div.
    * When provided, completely replaces the default element.
@@ -199,7 +221,7 @@ export const FlowAnchor = forwardRef<HTMLElement, FlowAnchorProps>(
     const anchorRef = useRef<HTMLElement>(null);
 
     if (!context) {
-      throw new Error('Flow.Anchor must be used within Flow.Node');
+      throw new Error("Flow.Anchor must be used within Flow.Node");
     }
 
     useEffect(() => {
@@ -207,18 +229,18 @@ export const FlowAnchor = forwardRef<HTMLElement, FlowAnchorProps>(
         return;
       }
 
-      if (type === 'start' || type === undefined) {
+      if (type === "start" || type === undefined) {
         context.registerStartAnchor(anchorRef.current);
       }
-      if (type === 'end' || type === undefined) {
+      if (type === "end" || type === undefined) {
         context.registerEndAnchor(anchorRef.current);
       }
 
       return () => {
-        if (type === 'start' || type === undefined) {
+        if (type === "start" || type === undefined) {
           context.registerStartAnchor(null);
         }
-        if (type === 'end' || type === undefined) {
+        if (type === "end" || type === undefined) {
           context.registerEndAnchor(null);
         }
       };
@@ -231,13 +253,13 @@ export const FlowAnchor = forwardRef<HTMLElement, FlowAnchorProps>(
       const renderProps = render.props as { children?: ReactNode };
       return cloneElement(render, {
         ref: mergedRef,
-        children: renderProps.children ?? children
+        children: renderProps.children ?? children,
       } as React.HTMLAttributes<HTMLElement> & { ref: React.Ref<HTMLElement> });
     }
 
     // Default element
     return <div ref={mergedRef}>{children}</div>;
-  }
+  },
 );
 
-FlowAnchor.displayName = 'Flow.Anchor';
+FlowAnchor.displayName = "Flow.Anchor";

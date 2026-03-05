@@ -261,7 +261,12 @@ export function FlowDiagram({
         onPan={handlePan}
         onPanEnd={handlePanEnd}
       >
-        <motion.div ref={contentRef} className="w-max mx-auto" style={{ x, y }}>
+        <motion.div
+          data-testid="flow-contents"
+          ref={contentRef}
+          className="w-max mx-auto"
+          style={{ x, y }}
+        >
           <FlowNodeList>{children}</FlowNodeList>
         </motion.div>
 
@@ -317,7 +322,8 @@ export type NodeData = {
 
 export const useNodeGroup = () => useDescendants<NodeData>();
 
-export const useNode = (props: NodeData) => useDescendantIndex<NodeData>(props);
+export const useNode = (props: NodeData, id?: string) =>
+  useDescendantIndex<NodeData>(props, id);
 
 /**
  * Hook to optionally register as a node if within a parent descendants context.
@@ -347,7 +353,7 @@ export const useOptionalNode = (props: NodeData) => {
         unregisterRef.current = null;
       }
     };
-  }, [id, renderOrder, props, parentContext]);
+  }, [id, renderOrder, props, parentContext?.register]);
 
   if (!parentContext) return null;
 
@@ -395,6 +401,8 @@ export function FlowNodeList({ children }: { children: ReactNode }) {
           y2: nextRect.top - offsetY + nextRect.height / 2,
           disabled: isDisabled,
           single: true,
+          fromId: currentNode.id,
+          toId: nextNode.id,
         });
       }
     }
@@ -418,7 +426,7 @@ export function FlowNodeList({ children }: { children: ReactNode }) {
       start: startAnchor,
       end: endAnchor,
     }),
-    [startAnchor, endAnchor],
+    [JSON.stringify(startAnchor), JSON.stringify(endAnchor)],
   );
 
   // Register with parent context if we're nested (e.g., inside Flow.Parallel)
