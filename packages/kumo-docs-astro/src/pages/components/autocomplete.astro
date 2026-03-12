@@ -1,0 +1,325 @@
+---
+import DocLayout from "../../layouts/DocLayout.astro";
+import Heading from "../../components/docs/Heading.astro";
+import ComponentSection from "../../components/docs/ComponentSection.astro";
+import ComponentExample from "../../components/docs/ComponentExample.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import PropsTable from "../../components/docs/PropsTable.astro";
+import {
+  AutocompleteDemo,
+  AutocompleteWithFieldDemo,
+  AutocompleteErrorDemo,
+  AutocompleteGroupedDemo,
+  AutocompleteSizesDemo,
+  AutocompleteControlledDemo,
+} from "../../components/demos/AutocompleteDemo";
+---
+
+<DocLayout
+  title="Autocomplete"
+  description="A free-form text input with an optional filtered suggestion list. Unlike Combobox, the value is not constrained to the items list."
+  sourceFile="components/autocomplete"
+  baseUIComponent="autocomplete"
+>
+  <ComponentSection>
+    <ComponentExample
+      code={`<Autocomplete items={fruits}>
+  <Autocomplete.InputGroup placeholder="Search fruits…" />
+  <Autocomplete.Content>
+    <Autocomplete.List>
+      {(item: string) => (
+        <Autocomplete.Item key={item} value={item}>
+          {item}
+        </Autocomplete.Item>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Content>
+</Autocomplete>
+
+const fruits = [
+  "Apple", "Banana", "Cherry", "Grape",
+  "Lemon", "Mango", "Orange", "Peach",
+];`}
+    >
+      <AutocompleteDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Installation</Heading>
+    <Heading level={3} class="mb-2 text-lg">Barrel</Heading>
+    <CodeBlock
+      code={`import { Autocomplete } from "@cloudflare/kumo";`}
+      lang="tsx"
+    />
+    <h3 class="mt-4 mb-2 text-lg font-semibold">Granular</h3>
+    <CodeBlock
+      code={`import { Autocomplete } from "@cloudflare/kumo/components/autocomplete";`}
+      lang="tsx"
+    />
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>When to use</Heading>
+    <p class="text-kumo-strong mb-4">
+      Use <code class="text-kumo-default">Autocomplete</code> when the input value
+      can be free-form text and suggestions are optional hints. Use <code
+        class="text-kumo-default">Combobox</code
+      > instead when the selected value must come from the predefined list.
+    </p>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Controlled</Heading>
+    <p class="text-kumo-strong mb-4">
+      Pass <code class="text-kumo-default">value</code> and <code
+        class="text-kumo-default">onValueChange</code
+      > for controlled usage.
+    </p>
+    <ComponentExample
+      code={`function App() {
+  const [value, setValue] = useState("");
+
+  return (
+    <Autocomplete
+      items={fruits}
+      value={value}
+      onValueChange={(v) => setValue(v)}
+    >
+      <Autocomplete.InputGroup placeholder="Type a fruit…" />
+      <Autocomplete.Content>
+        <Autocomplete.List>
+          {(item: string) => (
+            <Autocomplete.Item key={item} value={item}>
+              {item}
+            </Autocomplete.Item>
+          )}
+        </Autocomplete.List>
+        <Autocomplete.Empty />
+      </Autocomplete.Content>
+    </Autocomplete>
+  );
+}`}
+    >
+      <AutocompleteControlledDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>With Field</Heading>
+    <p class="text-kumo-strong mb-4">
+      Add <code class="text-kumo-default">label</code>, <code
+        class="text-kumo-default">description</code
+      >, and <code class="text-kumo-default">required</code> to enable the built-in
+      Field wrapper.
+    </p>
+    <ComponentExample
+      code={`<Autocomplete
+  items={countries}
+  label="Country"
+  description="Start typing to filter countries"
+  filter={(item, query) =>
+    item.label.toLowerCase().includes(query.toLowerCase())
+  }
+>
+  <Autocomplete.InputGroup placeholder="Search countries…" />
+  <Autocomplete.Content>
+    <Autocomplete.List>
+      {(item: Country) => (
+        <Autocomplete.Item key={item.code} value={item}>
+          {item.label}
+        </Autocomplete.Item>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Content>
+</Autocomplete>`}
+    >
+      <AutocompleteWithFieldDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Error State</Heading>
+    <p class="text-kumo-strong mb-4">
+      Display validation errors with the <code class="text-kumo-default"
+        >error</code
+      > prop.
+    </p>
+    <ComponentExample
+      code={`<Autocomplete
+  items={countries}
+  label="Country"
+  error={{ message: "Please enter a valid country", match: true }}
+  filter={(item, query) =>
+    item.label.toLowerCase().includes(query.toLowerCase())
+  }
+>
+  <Autocomplete.InputGroup placeholder="Search countries…" />
+  <Autocomplete.Content>
+    <Autocomplete.List>
+      {(item: Country) => (
+        <Autocomplete.Item key={item.code} value={item}>
+          {item.label}
+        </Autocomplete.Item>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Content>
+</Autocomplete>`}
+    >
+      <AutocompleteErrorDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Grouped</Heading>
+    <p class="text-kumo-strong mb-4">
+      Group items into categories using <code class="text-kumo-default"
+        >Autocomplete.Group</code
+      > and <code class="text-kumo-default">Autocomplete.GroupLabel</code>.
+    </p>
+    <ComponentExample
+      code={`<Autocomplete items={servers}>
+  <Autocomplete.InputGroup placeholder="Select region…" />
+  <Autocomplete.Content>
+    <Autocomplete.List>
+      {(group: ServerGroup) => (
+        <Autocomplete.Group key={group.value} items={group.items}>
+          <Autocomplete.GroupLabel>{group.value}</Autocomplete.GroupLabel>
+          <Autocomplete.Collection>
+            {(item: ServerLocation) => (
+              <Autocomplete.Item key={item.value} value={item}>
+                {item.label}
+              </Autocomplete.Item>
+            )}
+          </Autocomplete.Collection>
+        </Autocomplete.Group>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Content>
+</Autocomplete>`}
+    >
+      <AutocompleteGroupedDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Sizes</Heading>
+    <p class="text-kumo-strong mb-4">
+      The <code class="text-kumo-default">size</code> prop on <code
+        class="text-kumo-default">Autocomplete.InputGroup</code
+      > supports four variants matching the Input component:
+      <code class="text-kumo-default">xs</code>, <code class="text-kumo-default"
+        >sm</code
+      >, <code class="text-kumo-default">base</code> (default), and <code
+        class="text-kumo-default">lg</code
+      >.
+    </p>
+    <ComponentExample
+      code={`<Autocomplete items={fruits}>
+  <Autocomplete.InputGroup size="sm" placeholder="sm" />
+  <Autocomplete.Content>
+    <Autocomplete.List>
+      {(item: string) => (
+        <Autocomplete.Item key={item} value={item}>{item}</Autocomplete.Item>
+      )}
+    </Autocomplete.List>
+  </Autocomplete.Content>
+</Autocomplete>`}
+    >
+      <AutocompleteSizesDemo client:load />
+    </ComponentExample>
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2}>Custom Filtering</Heading>
+    <p class="text-kumo-strong mb-4">
+      By default, Base UI filters items using a built-in string match. Pass a
+      custom <code class="text-kumo-default">filter</code> function for advanced
+      logic such as fuzzy matching or object properties.
+    </p>
+    <CodeBlock
+      code={`// Filter on a property of object items
+<Autocomplete
+  items={countries}
+  filter={(item, query) =>
+    item.label.toLowerCase().includes(query.toLowerCase())
+  }
+>
+  ...
+</Autocomplete>
+
+// Disable filtering entirely (e.g. async search)
+<Autocomplete items={results} filter={null}>
+  ...
+</Autocomplete>`}
+      lang="tsx"
+    />
+  </ComponentSection>
+
+  <ComponentSection>
+    <Heading level={2} class="mb-6">API Reference</Heading>
+
+    <div class="space-y-8">
+      <div>
+        <h3 class="mb-3 text-lg font-semibold font-mono">Autocomplete</h3>
+        <p class="mb-3 text-sm text-kumo-strong">
+          Root component. Wraps all sub-components and manages state.
+        </p>
+        <PropsTable component="Autocomplete" />
+      </div>
+
+      <div>
+        <h3 class="mb-3 text-lg font-semibold font-mono">
+          Autocomplete.InputGroup
+        </h3>
+        <p class="mb-3 text-sm text-kumo-strong">
+          Self-contained input wrapper that renders the text input, clear
+          button, and dropdown trigger together.
+        </p>
+        <PropsTable component="Autocomplete.InputGroup" />
+      </div>
+
+      <div>
+        <h3 class="mb-3 text-lg font-semibold font-mono">
+          Autocomplete.Content
+        </h3>
+        <p class="mb-3 text-sm text-kumo-strong">
+          Dropdown popup container. Wraps Portal, Positioner, and Popup.
+        </p>
+        <PropsTable component="Autocomplete.Content" />
+      </div>
+
+      <div>
+        <h3 class="mb-3 text-lg font-semibold font-mono">Autocomplete.Item</h3>
+        <p class="mb-3 text-sm text-kumo-strong">
+          Individual suggestion item in the list.
+        </p>
+        <PropsTable component="Autocomplete.Item" />
+      </div>
+    </div>
+
+    <h3 class="mb-2 text-lg font-semibold mt-6">Additional Sub-components</h3>
+    <ul class="list-disc list-inside text-kumo-strong space-y-1">
+      <li>
+        <code class="text-kumo-default">Autocomplete.List</code> — scrollable list
+        container with render prop
+      </li>
+      <li>
+        <code class="text-kumo-default">Autocomplete.Group</code> — groups items
+        under a heading
+      </li>
+      <li>
+        <code class="text-kumo-default">Autocomplete.GroupLabel</code> — heading
+        label for a group
+      </li>
+      <li>
+        <code class="text-kumo-default">Autocomplete.Collection</code> — item container
+        within a group
+      </li>
+      <li>
+        <code class="text-kumo-default">Autocomplete.Separator</code> — horizontal
+        divider between items
+      </li>
+    </ul>
+  </ComponentSection>
+</DocLayout>
