@@ -272,7 +272,7 @@ Separator.displayName = "Autocomplete.Separator";
  * Use Combobox when the selected value must come from the list.
  *
  * Compound component: `Autocomplete` (Root), `.InputGroup`, `.Content`, `.Item`,
- * `.Empty`, `.GroupLabel`, `.Group`, `.Separator`, `.List`, `.Collection`.
+ * `.GroupLabel`, `.Group`, `.Separator`, `.List`, `.Collection`.
  *
  * `InputGroup` renders the input, clear button, and caret trigger as a unit.
  * Pass a `size` prop to `InputGroup` to match the Input component sizes.
@@ -285,7 +285,6 @@ Separator.displayName = "Autocomplete.Separator";
  *     <Autocomplete.List>
  *       {(item) => <Autocomplete.Item value={item}>{item}</Autocomplete.Item>}
  *     </Autocomplete.List>
- *     <Autocomplete.Empty />
  *   </Autocomplete.Content>
  * </Autocomplete>
  * ```
