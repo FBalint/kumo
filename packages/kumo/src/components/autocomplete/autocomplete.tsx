@@ -50,12 +50,11 @@ export function autocompleteVariants({
  *     <Autocomplete.List>
  *       {(item) => <Autocomplete.Item value={item}>{item}</Autocomplete.Item>}
  *     </Autocomplete.List>
- *     <Autocomplete.Empty>No results</Autocomplete.Empty>
  *   </Autocomplete.Content>
  * </Autocomplete>
  * ```
  */
-export interface AutocompleteProps extends KumoAutocompleteVariantsProps {
+export interface AutocompleteProps {
   /** Array of items to display in the dropdown */
   items: unknown[];
   /** The controlled input value */
@@ -91,7 +90,6 @@ function Root<ItemValue>({
   description,
   error,
   children,
-  size: _size,
   ...props
 }: AutocompleteBase.Root.Props<ItemValue> & {
   label?: ReactNode;
@@ -99,7 +97,6 @@ function Root<ItemValue>({
   labelTooltip?: ReactNode;
   description?: ReactNode;
   error?: string | { message: ReactNode; match: FieldErrorMatch };
-  size?: KumoAutocompleteSize;
 }) {
   const rootProps = props as Omit<
     AutocompleteBase.Root.Props<ItemValue>,
@@ -147,7 +144,7 @@ function InputGroup({
     <AutocompleteBase.Input
       className={cn(
         inputVariants({ size, focusIndicator: true }),
-        "w-full max-w-xs",
+        "w-full",
         className,
       )}
       placeholder={placeholder}
@@ -274,7 +271,7 @@ Separator.displayName = "Autocomplete.Separator";
  * Compound component: `Autocomplete` (Root), `.InputGroup`, `.Content`, `.Item`,
  * `.GroupLabel`, `.Group`, `.Separator`, `.List`, `.Collection`.
  *
- * `InputGroup` renders the input, clear button, and caret trigger as a unit.
+ * `InputGroup` renders the text input with Input component styling.
  * Pass a `size` prop to `InputGroup` to match the Input component sizes.
  *
  * @example
@@ -302,5 +299,6 @@ export const Autocomplete = Object.assign(Root, {
   List,
 
   // Pass-through Base UI sub-components
+  Empty: AutocompleteBase.Empty,
   Collection: AutocompleteBase.Collection,
 });
