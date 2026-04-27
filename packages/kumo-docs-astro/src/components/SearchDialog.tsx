@@ -133,6 +133,13 @@ const STATIC_PAGES: Array<{
     category: "AI Blocks",
     type: "block",
   },
+  {
+    name: "Decision Menu",
+    description: "A card-based action menu for AI-driven decisions with keyboard navigation.",
+    url: "/ai-blocks/decision-menu",
+    category: "AI Blocks",
+    type: "block",
+  },
 ];
 
 /** Better descriptions from the Astro doc pages */

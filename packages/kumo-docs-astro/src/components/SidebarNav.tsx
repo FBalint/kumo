@@ -100,6 +100,7 @@ const blockItems: NavItem[] = [
 // AI Blocks are specialized blocks for AI-related UI patterns
 const aiBlockItems: NavItem[] = [
   { label: "Prompt Input", href: "/ai-blocks/prompt-input" },
+  { label: "Decision Menu", href: "/ai-blocks/decision-menu" },
 ];
 
 // Build info injected via Vite define in astro.config.mjs

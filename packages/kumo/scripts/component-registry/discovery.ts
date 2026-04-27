@@ -73,6 +73,7 @@ export const CATEGORY_MAP: Record<string, string> = {
   "delete-resource": "Other",
   // AI Blocks
   "prompt-input": "AI",
+  "decision-menu": "AI",
 };
 
 /**
