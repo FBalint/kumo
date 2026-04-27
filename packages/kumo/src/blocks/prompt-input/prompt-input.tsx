@@ -57,6 +57,7 @@ export type PromptInputProps = {
 
 export type PromptInputTextareaProps = {
   className?: string;
+  /** Grow the textarea to fit content up to max-height (default `max-h-64` / 256px). Override max height via className, e.g. `className="max-h-96"`. */
   autoResize?: boolean;
   submitOnEnter?: boolean;
 } & React.ComponentProps<typeof Textarea>;
@@ -163,24 +164,17 @@ const PromptInputTextarea: React.FC<PromptInputTextareaProps> = ({
   const isCompact = context?.variant === "compact";
   const shouldAutoResize = autoResize && !isCompact;
 
-  // Auto-resize: grow with content up to max-h-64 (256px), then scroll.
-  // Reacts to both DOM input events and controlled value prop changes.
+  // Auto-resize: set height to scrollHeight on every change.
+  // The CSS max-height (default max-h-64 / 256px) caps the visual height;
+  // override via className, e.g. className="max-h-96".
   useEffect(() => {
     if (!shouldAutoResize || !textareaRef.current) return;
 
     const textarea = textareaRef.current;
-    const MAX_HEIGHT = 256; // matches max-h-64
 
     const adjustHeight = () => {
       textarea.style.height = "auto";
-      const next = textarea.scrollHeight;
-      if (next >= MAX_HEIGHT) {
-        textarea.style.height = `${MAX_HEIGHT}px`;
-        textarea.style.overflowY = "auto";
-      } else {
-        textarea.style.height = `${next}px`;
-        textarea.style.overflowY = "hidden";
-      }
+      textarea.style.height = `${textarea.scrollHeight}px`;
     };
 
     adjustHeight();
@@ -211,8 +205,6 @@ const PromptInputTextarea: React.FC<PromptInputTextareaProps> = ({
     // outer container (PromptInputForm) owns the focus ring exclusively.
     "resize-none w-full border-none ring-0 focus:ring-0 focus:ring-transparent bg-transparent outline-none focus:outline-none p-0 !pb-0 m-0 rounded-none",
     isCompact ? "flex-1" : "max-h-64 overflow-y-auto",
-    // When autoResize is active, let height be driven by JS; hide scrollbar.
-    shouldAutoResize && "overflow-hidden",
   );
 
   return (
