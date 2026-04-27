@@ -1,0 +1,114 @@
+---
+layout: ~/layouts/MdxDocLayout.astro
+title: "Prompt Input"
+description: "A composable AI prompt input with textarea, footer actions, and submit button."
+sourceFile: "blocks/prompt-input"
+---
+
+import ComponentSection from "~/components/docs/ComponentSection.astro";
+import ComponentExample from "~/components/docs/ComponentExample.astro";
+import PropsTable from "~/components/docs/PropsTable.astro";
+import Callout from "~/components/docs/Callout.astro";
+import {
+  PromptInputDemo,
+  PromptInputLargeDemo,
+  PromptInputCompactDemo,
+  PromptInputCompactLargeDemo,
+} from "~/components/demos/PromptInputDemo";
+
+{/* Prompt Input */}
+
+<ComponentSection>
+
+## Prompt Input
+
+<ComponentExample demo="PromptInputDemo">
+  <PromptInputDemo client:visible />
+</ComponentExample>
+
+</ComponentSection>
+
+{/* Prompt Input Large */}
+
+<ComponentSection>
+
+## Prompt Input Large
+
+<ComponentExample demo="PromptInputLargeDemo">
+  <PromptInputLargeDemo client:visible />
+</ComponentExample>
+
+</ComponentSection>
+
+{/* Compact */}
+
+<ComponentSection>
+
+## Compact
+
+<ComponentExample demo="PromptInputCompactDemo">
+  <PromptInputCompactDemo client:visible />
+</ComponentExample>
+
+</ComponentSection>
+
+{/* Compact Large */}
+
+<ComponentSection>
+
+## Compact Large
+
+<ComponentExample demo="PromptInputCompactLargeDemo">
+  <PromptInputCompactLargeDemo client:visible />
+</ComponentExample>
+
+</ComponentSection>
+
+{/* Installation */}
+
+<ComponentSection>
+
+## Installation
+
+  <p>
+    PromptInput is an <strong>AI block</strong> — a CLI-installed component that
+    you own and can customize.
+  </p>
+  <div class="space-y-4">
+    <div>
+      <p>**1. Initialize Kumo config (first time only)**</p>
+
+```bash
+npx @cloudflare/kumo init
+```
+
+</div>
+<div>
+<p>**2. Install the block**</p>
+
+```bash
+npx @cloudflare/kumo add PromptInput
+```
+
+</div>
+<div>
+<p>**3. Import from your local path**</p>
+
+```tsx
+import { PromptInput } from "./components/kumo/prompt-input/prompt-input";
+```
+
+    </div>
+
+  </div>
+</ComponentSection>
+
+{/* API Reference */}
+
+<ComponentSection>
+
+## API Reference
+
+  <PropsTable component="PromptInput" />
+
+</ComponentSection>

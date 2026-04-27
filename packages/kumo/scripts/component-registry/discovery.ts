@@ -70,6 +70,9 @@ export const CATEGORY_MAP: Record<string, string> = {
   // Blocks
   "page-header": "Layout",
   "resource-list": "Layout",
+  "delete-resource": "Other",
+  // AI Blocks
+  "prompt-input": "AI",
 };
 
 /**
