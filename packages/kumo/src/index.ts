@@ -133,6 +133,7 @@ export {
   ToastProvider,
   Toast,
   useKumoToastManager,
+  createKumoToastManager,
 } from "./components/toast";
 export { Tooltip, TooltipProvider } from "./components/tooltip";
 export {
@@ -172,6 +173,7 @@ export {
   KUMO_COMMAND_PALETTE_VARIANTS,
   KUMO_COMMAND_PALETTE_DEFAULT_VARIANTS,
   type CommandPaletteRootProps,
+  type CommandPaletteInputProps,
   type CommandPaletteItemProps,
   type CommandPaletteResultItemProps,
   type CommandPaletteFooterProps,
@@ -221,7 +223,6 @@ export {
   type CloudflareLogoSvgVariant,
   type CloudflareLogoSvgColor,
 } from "./components/cloudflare-logo";
-
 // DatePicker
 export {
   DatePicker,
@@ -234,9 +235,14 @@ export { Flow } from "./components/flow";
 export {
   Chart,
   ChartPalette,
+  SankeyChart,
   TimeseriesChart,
   ChartLegend,
   type KumoChartOption,
+  type SankeyChartProps,
+  type SankeyNodeData,
+  type SankeyLinkData,
+  type SankeyTooltipParams,
 } from "./components/chart";
 export {
   Autocomplete,

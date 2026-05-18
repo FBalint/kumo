@@ -406,10 +406,11 @@ const SidebarRoot = forwardRef<HTMLElement, SidebarRootProps>(
       return (
         <DialogBase.Root open={openMobile} onOpenChange={setOpenMobile}>
           <DialogBase.Portal>
-            <DialogBase.Backdrop className="fixed inset-0 z-50 bg-black/50 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+            <DialogBase.Backdrop data-sidebar-backdrop="" className="fixed inset-0 bg-black/50 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
             <DialogBase.Popup
+              data-sidebar-popup=""
               className={cn(
-                "fixed inset-y-0 z-50 flex w-[--sidebar-width] flex-col bg-kumo-base p-0",
+                "fixed inset-y-0 flex w-[--sidebar-width] flex-col bg-kumo-base p-0",
                 "duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0",
                 side === "left" &&
                   "left-0 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full",
@@ -1143,7 +1144,7 @@ const SidebarMenuAction = forwardRef<
     data-sidebar="menu-action"
     className={cn(
       "absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1",
-      "text-kumo-strong hover:bg-kumo-overlay",
+      "text-kumo-subtle hover:bg-kumo-overlay",
       "focus-visible:ring-2 focus-visible:ring-kumo-brand",
       "transition-colors duration-150",
       "group-data-[state=collapsed]/sidebar:hidden",
@@ -1180,7 +1181,7 @@ const SidebarMenuBadge = forwardRef<
     data-sidebar="menu-badge"
     className={cn(
       "inline-flex shrink-0 items-center rounded-full border border-dashed border-kumo-hairline",
-      "select-none px-1.5 py-0.5 text-[11px]/none font-medium text-kumo-strong",
+      "select-none px-1.5 py-0.5 text-[11px]/none font-medium text-kumo-subtle",
       // Hidden when collapsed
       "group-data-[state=collapsed]/sidebar:hidden",
       className,
@@ -1450,7 +1451,7 @@ const SidebarTrigger = forwardRef<
       aria-label="Toggle sidebar"
       className={cn(
         "flex items-center rounded-md p-1.5",
-        "text-kumo-subtle hover:text-kumo-strong hover:bg-kumo-overlay",
+        "text-kumo-subtle hover:text-kumo-default hover:bg-kumo-overlay",
         "focus-visible:ring-2 focus-visible:ring-kumo-brand",
         "transition-colors duration-150",
         className,

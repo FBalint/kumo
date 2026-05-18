@@ -13,6 +13,7 @@ import {
   type KumoInputSize,
 } from "../input/input";
 import { cn } from "../../utils/cn";
+import { resolveVariant } from "../../utils/resolve-variant";
 import { Field, type FieldErrorMatch } from "../field/field";
 import {
   usePortalContainer,
@@ -69,7 +70,7 @@ export interface KumoComboboxVariantsProps {
 export function comboboxVariants({
   inputSide = KUMO_COMBOBOX_DEFAULT_VARIANTS.inputSide,
 }: KumoComboboxVariantsProps = {}) {
-  return cn(KUMO_COMBOBOX_VARIANTS.inputSide[inputSide].classes);
+  return cn(resolveVariant(KUMO_COMBOBOX_VARIANTS.inputSide, inputSide, KUMO_COMBOBOX_DEFAULT_VARIANTS.inputSide).classes);
 }
 
 // Legacy type alias for backwards compatibility
@@ -260,11 +261,12 @@ function TriggerValue({
         inputVariants({ size }),
         "relative flex items-center",
         "data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
+        "data-[placeholder]:text-kumo-placeholder",
         iconStyles.padding,
         className,
       )}
     >
-      <ComboboxBase.Value>{props.children}</ComboboxBase.Value>
+      <ComboboxBase.Value {...props} />
       <ComboboxBase.Icon
         className={cn(
           "absolute top-1/2 -translate-y-1/2 flex items-center text-kumo-subtle",
@@ -370,11 +372,23 @@ function TriggerInput({
   );
 }
 
-function Item({ children, ...props }: ComboboxBase.Item.Props) {
+function Item({
+  children,
+  className,
+  ...props
+}: ComboboxBase.Item.Props & { className?: string }) {
   return (
     <ComboboxBase.Item
       {...props}
-      className="group mx-1.5 grid cursor-pointer grid-cols-[1fr_16px] gap-2 rounded px-2 py-1.5 text-base data-highlighted:bg-kumo-tint"
+      className={cn(
+        "group mx-1.5 grid grid-cols-[1fr_16px] gap-2 rounded px-2 py-1.5 text-base",
+        "cursor-pointer data-highlighted:bg-kumo-tint",
+        // Disabled rows: muted text, no pointer, suppress highlight bg even
+        // when keyboard nav lands on them. Base UI sets `data-disabled` on
+        // the element when the `disabled` prop is true.
+        "data-[disabled]:cursor-not-allowed data-[disabled]:text-kumo-subtle data-[disabled]:opacity-60 data-[disabled]:data-highlighted:bg-transparent",
+        className,
+      )}
     >
       <div className="col-start-1">{children}</div>
       <ComboboxBase.ItemIndicator className="col-start-2 flex items-center">
@@ -429,7 +443,7 @@ function GroupLabel(props: ComboboxBase.GroupLabel.Props) {
     <ComboboxBase.GroupLabel
       {...props}
       className={cn(
-        "mx-1.5 px-2 py-1.5 text-sm text-kumo-strong",
+        "mx-1.5 px-2 py-1.5 text-sm text-kumo-subtle",
         props.className,
       )}
     />
@@ -603,4 +617,8 @@ export const Combobox = Object.assign(Root, {
 
   // BaseUI
   Collection: ComboboxBase.Collection,
+
+  Trigger: ComboboxBase.Trigger,
+  Value: ComboboxBase.Value,
+  Icon: ComboboxBase.Icon,
 });

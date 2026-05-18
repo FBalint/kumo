@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CaretUpDownIcon } from "@phosphor-icons/react";
 import { Combobox, Text, Button } from "@cloudflare/kumo";
 
 // Basic fruits list for simple demos (expanded to test scrolling)
@@ -225,6 +226,36 @@ export function ComboboxSearchableInsideDemo() {
   );
 }
 
+/** Demonstrates using TriggerValue with a placeholder, behaving like a
+ * searchable Select field. The placeholder is shown until a value is selected. */
+export function ComboboxSearchableSelectDemo() {
+  const [value, setValue] = useState<Language | null>(null);
+
+  return (
+    <Combobox
+      value={value}
+      onValueChange={(v) => setValue(v as Language | null)}
+      items={languages}
+    >
+      <Combobox.TriggerValue
+        className="w-[200px]"
+        placeholder="Select a language"
+      />
+      <Combobox.Content>
+        <Combobox.Input placeholder="Search languages" />
+        <Combobox.Empty />
+        <Combobox.List>
+          {(item: Language) => (
+            <Combobox.Item key={item.value} value={item}>
+              {item.emoji} {item.label}
+            </Combobox.Item>
+          )}
+        </Combobox.List>
+      </Combobox.Content>
+    </Combobox>
+  );
+}
+
 // Grouped items demo
 export function ComboboxGroupedDemo() {
   const [value, setValue] = useState<ServerLocation | null>(null);
@@ -396,6 +427,65 @@ export function ComboboxDisabledDemo() {
   );
 }
 
+/** Demonstrates disabled individual items. The `disabled` prop on
+ * `Combobox.Item` blocks click and keyboard selection, and renders the row
+ * with muted text + a not-allowed cursor. Useful for surfacing options that
+ * exist but the user can't pick (e.g. permission-gated, read-only, or
+ * already in use elsewhere). */
+export function ComboboxDisabledItemsDemo() {
+  type DatabaseItemWithDisabled = DatabaseItem & {
+    disabled?: boolean;
+    reason?: string;
+  };
+
+  const items: DatabaseItemWithDisabled[] = [
+    { value: "postgres", label: "PostgreSQL" },
+    { value: "mysql", label: "MySQL" },
+    { value: "mariadb", label: "MariaDB", disabled: true, reason: "Beta" },
+    { value: "mongodb", label: "MongoDB" },
+    {
+      value: "cassandra",
+      label: "Apache Cassandra",
+      disabled: true,
+      reason: "Coming soon",
+    },
+    { value: "redis", label: "Redis" },
+    { value: "d1", label: "Cloudflare D1" },
+  ];
+
+  const [value, setValue] = useState<DatabaseItemWithDisabled | null>(null);
+
+  return (
+    <div className="w-80">
+      <Combobox value={value} onValueChange={setValue} items={items}>
+        <Combobox.TriggerInput placeholder="Select database" />
+        <Combobox.Content>
+          <Combobox.Empty />
+          <Combobox.List>
+            {(item: DatabaseItemWithDisabled) => (
+              <Combobox.Item
+                key={item.value}
+                value={item}
+                disabled={item.disabled}
+              >
+                <span>
+                  {item.label}
+                  {item.reason && (
+                    <Text variant="secondary" size="xs" as="span">
+                      {" — "}
+                      {item.reason}
+                    </Text>
+                  )}
+                </span>
+              </Combobox.Item>
+            )}
+          </Combobox.List>
+        </Combobox.Content>
+      </Combobox>
+    </div>
+  );
+}
+
 export function ComboboxErrorDemo() {
   const [value, setValue] = useState<DatabaseItem | null>(null);
 
@@ -517,5 +607,41 @@ export function ComboboxSizesSearchableInsideDemo() {
         </Combobox.Content>
       </Combobox>
     </div>
+  );
+}
+
+export function ComboboxCustomTriggerDemo() {
+  const [value, setValue] = useState<Language>(languages[0]);
+
+  return (
+    <Combobox
+      value={value}
+      onValueChange={(v) => setValue(v as Language)}
+      items={languages}
+    >
+      <Combobox.Trigger
+        render={
+          <Button variant="ghost" size="sm" />
+        }
+      >
+        <Combobox.Value>
+          <span className="truncate">
+            {value.emoji} {value.label}
+          </span>
+        </Combobox.Value>
+        <CaretUpDownIcon size={14} className="text-kumo-subtle shrink-0" />
+      </Combobox.Trigger>
+      <Combobox.Content>
+        <Combobox.Input placeholder="Search languages" />
+        <Combobox.Empty />
+        <Combobox.List>
+          {(item: Language) => (
+            <Combobox.Item key={item.value} value={item}>
+              {item.emoji} {item.label}
+            </Combobox.Item>
+          )}
+        </Combobox.List>
+      </Combobox.Content>
+    </Combobox>
   );
 }
