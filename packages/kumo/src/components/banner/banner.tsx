@@ -1,4 +1,9 @@
-import { type ReactNode, isValidElement, forwardRef } from "react";
+import {
+  type HTMLAttributes,
+  type ReactNode,
+  isValidElement,
+  forwardRef,
+} from "react";
 import { cn } from "../../utils/cn";
 import { resolveVariant } from "../../utils/resolve-variant";
 
@@ -6,7 +11,7 @@ import { resolveVariant } from "../../utils/resolve-variant";
 export const KUMO_BANNER_BASE_STYLES =
   "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-base";
 
-/** Banner variant definitions mapping variant names to their Tailwind classes and descriptions. */
+/** Banner variant definitions mapping style options to their Tailwind classes and descriptions. */
 export const KUMO_BANNER_VARIANTS = {
   variant: {
     default: {
@@ -25,15 +30,39 @@ export const KUMO_BANNER_VARIANTS = {
       iconClasses: "text-kumo-danger",
       description: "Error banner for critical issues",
     },
+    secondary: {
+      classes: "bg-kumo-recessed border-kumo-line text-kumo-subtle",
+      iconClasses: "text-kumo-subtle",
+      description: "Neutral banner for secondary messages",
+    },
   },
+  appearance: {
+    bordered: {
+      classes: "",
+      description: "Banner with a visible border",
+    },
+    subtle: {
+      classes: "border-0",
+      description: "Banner with a borderless tinted background",
+    },
+  },
+} as const;
+
+const KUMO_BANNER_SUBTLE_VARIANT_STYLES = {
+  default: { classes: "bg-kumo-info-tint/70" },
+  alert: { classes: "bg-kumo-warning-tint" },
+  error: { classes: "bg-kumo-danger-tint/60" },
+  secondary: { classes: "bg-kumo-recessed" },
 } as const;
 
 export const KUMO_BANNER_DEFAULT_VARIANTS = {
   variant: "default",
+  appearance: "bordered",
 } as const;
 
 // Derived types from KUMO_BANNER_VARIANTS
 export type KumoBannerVariant = keyof typeof KUMO_BANNER_VARIANTS.variant;
+export type KumoBannerAppearance = keyof typeof KUMO_BANNER_VARIANTS.appearance;
 
 export interface KumoBannerVariantsProps {
   /**
@@ -41,23 +70,46 @@ export interface KumoBannerVariantsProps {
    * - `"default"` — Informational banner for general messages
    * - `"alert"` — Warning banner for cautionary messages
    * - `"error"` — Error banner for critical issues
+   * - `"secondary"` — Neutral banner for secondary messages
    * @default "default"
    */
   variant?: KumoBannerVariant;
+  /**
+   * Visual treatment of the banner.
+   * - `"bordered"` — Current default banner with a visible border
+   * - `"subtle"` — Borderless banner with a stronger tinted background
+   * @default "bordered"
+   */
+  appearance?: KumoBannerAppearance;
 }
 
 export function bannerVariants({
   variant = KUMO_BANNER_DEFAULT_VARIANTS.variant,
+  appearance = KUMO_BANNER_DEFAULT_VARIANTS.appearance,
 }: KumoBannerVariantsProps = {}) {
+  const resolvedVariant = resolveVariant(
+    KUMO_BANNER_VARIANTS.variant,
+    variant,
+    KUMO_BANNER_DEFAULT_VARIANTS.variant,
+  );
+  const resolvedAppearance = resolveVariant(
+    KUMO_BANNER_VARIANTS.appearance,
+    appearance,
+    KUMO_BANNER_DEFAULT_VARIANTS.appearance,
+  );
+
   return cn(
     // Base styles (exported as KUMO_BANNER_BASE_STYLES for Figma plugin)
     KUMO_BANNER_BASE_STYLES,
     // Apply variant styles from KUMO_BANNER_VARIANTS
-    resolveVariant(
-      KUMO_BANNER_VARIANTS.variant,
-      variant,
-      KUMO_BANNER_DEFAULT_VARIANTS.variant,
-    ).classes,
+    resolvedVariant.classes,
+    resolvedAppearance.classes,
+    appearance === "subtle" &&
+      resolveVariant(
+        KUMO_BANNER_SUBTLE_VARIANT_STYLES,
+        variant,
+        KUMO_BANNER_DEFAULT_VARIANTS.variant,
+      ).classes,
   );
 }
 
@@ -78,7 +130,8 @@ export enum BannerVariant {
  * <Banner variant="error" title="Save failed" description="We couldn't save your changes." />
  * ```
  */
-export interface BannerProps {
+export interface BannerProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "title"> {
   /** Icon element rendered before the banner content (e.g. from `@phosphor-icons/react`). */
   icon?: ReactNode;
   /** Primary heading text for the banner. Use for i18n string injection. */
@@ -96,9 +149,17 @@ export interface BannerProps {
    * - `"default"` — Informational blue banner for general messages
    * - `"alert"` — Warning yellow banner for cautionary messages
    * - `"error"` — Error red banner for critical issues
+   * - `"secondary"` — Neutral banner for secondary messages
    * @default "default"
    */
   variant?: KumoBannerVariant;
+  /**
+   * Visual treatment of the banner.
+   * - `"bordered"` — Current default banner with a visible border
+   * - `"subtle"` — Borderless banner with a stronger tinted background
+   * @default "bordered"
+   */
+  appearance?: KumoBannerAppearance;
   /** Additional CSS classes merged via `cn()`. */
   className?: string;
 }
@@ -132,7 +193,9 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
     children,
     text,
     variant = KUMO_BANNER_DEFAULT_VARIANTS.variant,
+    appearance = KUMO_BANNER_DEFAULT_VARIANTS.appearance,
     className,
+    ...props
   },
   ref,
 ) {
@@ -145,7 +208,11 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
   // Structured mode: title and/or description provided
   if (title || description) {
     return (
-      <div ref={ref} className={cn(bannerVariants({ variant }), className)}>
+      <div
+        ref={ref}
+        className={cn(bannerVariants({ variant, appearance }), className)}
+        {...props}
+      >
         {icon && (
           <span
             className={cn(
@@ -156,7 +223,12 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
             {icon}
           </span>
         )}
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 items-center justify-between gap-3",
+            !title && "pt-px",
+          )}
+        >
           <div className="flex flex-col gap-0.5">
             {title && <p className="font-medium leading-snug">{title}</p>}
             {description && (
@@ -182,7 +254,11 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
   const content = isValidElement(value) ? value : <p>{value}</p>;
 
   return (
-    <div ref={ref} className={cn(bannerVariants({ variant }), className)}>
+    <div
+      ref={ref}
+      className={cn(bannerVariants({ variant, appearance }), className)}
+      {...props}
+    >
       {icon && (
         <span className={cn("shrink-0", variantConfig.iconClasses)}>
           {icon}

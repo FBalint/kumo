@@ -22,6 +22,12 @@ export function BannerVariantsDemo() {
         title="Save failed"
         description="We couldn't save your changes. Please try again."
       />
+      <Banner
+        icon={<Info weight="fill" />}
+        variant="secondary"
+        title="Maintenance scheduled"
+        description="This service will be unavailable for 10 minutes."
+      />
     </div>
   );
 }
@@ -58,6 +64,53 @@ export function BannerErrorDemo() {
       title="Save failed"
       description="We couldn't save your changes. Please try again."
     />
+  );
+}
+
+/** Neutral secondary banner for contextual messages. */
+export function BannerSecondaryDemo() {
+  return (
+    <Banner
+      icon={<Info weight="fill" />}
+      variant="secondary"
+      title="Maintenance scheduled"
+      description="This service will be unavailable for 10 minutes."
+    />
+  );
+}
+
+/** Borderless subtle banner appearance. */
+export function BannerSubtleDemo() {
+  return (
+    <div className="w-full space-y-3">
+      <Banner
+        appearance="subtle"
+        icon={<Info weight="fill" />}
+        title="Update available"
+        description="A new version is ready to install."
+      />
+      <Banner
+        appearance="subtle"
+        icon={<Warning weight="fill" />}
+        variant="alert"
+        title="Session expiring"
+        description="Your session will expire in 5 minutes."
+      />
+      <Banner
+        appearance="subtle"
+        icon={<WarningCircle weight="fill" />}
+        variant="error"
+        title="Save failed"
+        description="We couldn't save your changes. Please try again."
+      />
+      <Banner
+        appearance="subtle"
+        icon={<Info weight="fill" />}
+        variant="secondary"
+        title="Maintenance scheduled"
+        description="This service will be unavailable for 10 minutes."
+      />
+    </div>
   );
 }
 
