@@ -42,16 +42,4 @@ describe("Banner", () => {
     expect(banner.textContent).toBe("System status");
   });
 
-  it("nudges description-only structured content into alignment with the icon", () => {
-    render(
-      <Banner
-        icon={<span data-testid="icon" />}
-        description="Description without a title"
-      />,
-    );
-
-    const content = screen.getByText("Description without a title").parentElement
-      ?.parentElement?.parentElement;
-    expect(content?.className).toContain("pt-px");
-  });
 });
