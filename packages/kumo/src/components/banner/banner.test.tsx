@@ -3,22 +3,6 @@ import { render, screen } from "@testing-library/react";
 import { Banner, bannerVariants } from "./banner";
 
 describe("Banner", () => {
-  it("keeps bordered appearance as the default", () => {
-    const className = bannerVariants();
-
-    expect(className).toContain("border");
-    expect(className).toContain("border-kumo-info/50");
-    expect(className).toContain("bg-kumo-info-tint/30");
-  });
-
-  it("supports subtle appearance", () => {
-    const className = bannerVariants({ appearance: "subtle" });
-
-    expect(className).toContain("border-0");
-    expect(className).toContain("bg-kumo-info-tint/70");
-    expect(className).not.toContain("bg-kumo-info-tint/30");
-  });
-
   it("supports secondary variant", () => {
     const className = bannerVariants({ variant: "secondary" });
 

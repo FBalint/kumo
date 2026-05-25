@@ -374,18 +374,16 @@ export function HomeGrid() {
       id: "banner",
       Component: (
         <div className="flex flex-col gap-2">
-          <Banner appearance="subtle" description="This is a default banner." />
+          <Banner description="This is a default banner." />
           <Banner
             icon={<WarningIcon weight="fill" />}
             title="This is an alert banner."
             variant="alert"
-            appearance="subtle"
           />
           <Banner
             icon={<WarningOctagonIcon weight="fill" />}
             title="This is an error banner."
             variant="error"
-            appearance="subtle"
           />
         </div>
       ),

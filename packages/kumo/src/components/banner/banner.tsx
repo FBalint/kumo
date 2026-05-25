@@ -9,60 +9,41 @@ import { resolveVariant } from "../../utils/resolve-variant";
 
 /** Base styles applied to all banner variants. */
 export const KUMO_BANNER_BASE_STYLES =
-  "flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-base";
+  "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-base";
 
 /** Banner variant definitions mapping style options to their Tailwind classes and descriptions. */
 export const KUMO_BANNER_VARIANTS = {
   variant: {
     default: {
-      classes: "bg-kumo-info-tint/30 border-kumo-info/50 text-kumo-info",
+      classes: "bg-kumo-info-tint/70 dark:bg-kumo-info-tint/50 text-kumo-info",
       iconClasses: "text-kumo-info",
       description: "Informational banner for general messages",
     },
     alert: {
       classes:
-        "bg-kumo-warning-tint/15 border-kumo-warning/50 text-kumo-warning",
+        "bg-kumo-warning-tint dark:bg-kumo-warning-tint/50 text-kumo-warning",
       iconClasses: "text-kumo-warning",
       description: "Warning banner for cautionary messages",
     },
     error: {
-      classes: "bg-kumo-danger-tint/15 border-kumo-danger/50 text-kumo-danger",
+      classes: "bg-kumo-danger-tint/60 text-kumo-danger",
       iconClasses: "text-kumo-danger",
       description: "Error banner for critical issues",
     },
     secondary: {
-      classes: "bg-kumo-recessed border-kumo-line text-kumo-subtle",
+      classes: "bg-kumo-contrast/5 text-kumo-subtle",
       iconClasses: "text-kumo-subtle",
       description: "Neutral banner for secondary messages",
     },
   },
-  appearance: {
-    bordered: {
-      classes: "",
-      description: "Banner with a visible border",
-    },
-    subtle: {
-      classes: "border-0",
-      description: "Banner with a borderless tinted background",
-    },
-  },
-} as const;
-
-const KUMO_BANNER_SUBTLE_VARIANT_STYLES = {
-  default: { classes: "bg-kumo-info-tint/70" },
-  alert: { classes: "bg-kumo-warning-tint" },
-  error: { classes: "bg-kumo-danger-tint/60" },
-  secondary: { classes: "bg-kumo-recessed" },
 } as const;
 
 export const KUMO_BANNER_DEFAULT_VARIANTS = {
   variant: "default",
-  appearance: "bordered",
 } as const;
 
 // Derived types from KUMO_BANNER_VARIANTS
 export type KumoBannerVariant = keyof typeof KUMO_BANNER_VARIANTS.variant;
-export type KumoBannerAppearance = keyof typeof KUMO_BANNER_VARIANTS.appearance;
 
 export interface KumoBannerVariantsProps {
   /**
@@ -74,28 +55,15 @@ export interface KumoBannerVariantsProps {
    * @default "default"
    */
   variant?: KumoBannerVariant;
-  /**
-   * Visual treatment of the banner.
-   * - `"bordered"` — Current default banner with a visible border
-   * - `"subtle"` — Borderless banner with a stronger tinted background
-   * @default "bordered"
-   */
-  appearance?: KumoBannerAppearance;
 }
 
 export function bannerVariants({
   variant = KUMO_BANNER_DEFAULT_VARIANTS.variant,
-  appearance = KUMO_BANNER_DEFAULT_VARIANTS.appearance,
 }: KumoBannerVariantsProps = {}) {
   const resolvedVariant = resolveVariant(
     KUMO_BANNER_VARIANTS.variant,
     variant,
     KUMO_BANNER_DEFAULT_VARIANTS.variant,
-  );
-  const resolvedAppearance = resolveVariant(
-    KUMO_BANNER_VARIANTS.appearance,
-    appearance,
-    KUMO_BANNER_DEFAULT_VARIANTS.appearance,
   );
 
   return cn(
@@ -103,13 +71,6 @@ export function bannerVariants({
     KUMO_BANNER_BASE_STYLES,
     // Apply variant styles from KUMO_BANNER_VARIANTS
     resolvedVariant.classes,
-    resolvedAppearance.classes,
-    appearance === "subtle" &&
-      resolveVariant(
-        KUMO_BANNER_SUBTLE_VARIANT_STYLES,
-        variant,
-        KUMO_BANNER_DEFAULT_VARIANTS.variant,
-      ).classes,
   );
 }
 
@@ -153,13 +114,6 @@ export interface BannerProps
    * @default "default"
    */
   variant?: KumoBannerVariant;
-  /**
-   * Visual treatment of the banner.
-   * - `"bordered"` — Current default banner with a visible border
-   * - `"subtle"` — Borderless banner with a stronger tinted background
-   * @default "bordered"
-   */
-  appearance?: KumoBannerAppearance;
   /** Additional CSS classes merged via `cn()`. */
   className?: string;
 }
@@ -193,7 +147,6 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
     children,
     text,
     variant = KUMO_BANNER_DEFAULT_VARIANTS.variant,
-    appearance = KUMO_BANNER_DEFAULT_VARIANTS.appearance,
     className,
     ...props
   },
@@ -210,7 +163,7 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
     return (
       <div
         ref={ref}
-        className={cn(bannerVariants({ variant, appearance }), className)}
+        className={cn(bannerVariants({ variant }), className)}
         {...props}
       >
         {icon && (
@@ -256,7 +209,7 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner(
   return (
     <div
       ref={ref}
-      className={cn(bannerVariants({ variant, appearance }), className)}
+      className={cn(bannerVariants({ variant }), className)}
       {...props}
     >
       {icon && (

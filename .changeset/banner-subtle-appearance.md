@@ -2,4 +2,4 @@
 "@cloudflare/kumo": minor
 ---
 
-Add Banner subtle appearance and secondary variant.
+Update Banner to use borderless tinted styling by default and add a secondary variant.
