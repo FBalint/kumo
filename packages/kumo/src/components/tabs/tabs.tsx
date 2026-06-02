@@ -189,7 +189,7 @@ export function Tabs({
         className={cn(
           "relative flex min-w-0 shrink items-stretch",
           isSegmented &&
-            "kumo-tabs-list overflow-x-auto rounded-lg bg-kumo-recessed px-0.5 [--scroll-fade-width:3rem]",
+            "kumo-tabs-list overflow-x-auto rounded-lg bg-kumo-recessed px-0.5 [--scroll-fade-width:3rem] scroll-px-(--scroll-fade-width)",
           isSegmented && (isSm ? "h-6.5 rounded-md" : "h-9"),
           isOverflowing && "cursor-grab active:cursor-grabbing",
           isUnderline && "gap-4 border-b border-kumo-hairline pb-2",
@@ -204,6 +204,13 @@ export function Tabs({
             data-kumo-part="tab"
             value={tab.value}
             render={tab.render}
+            onClick={(e) => {
+              e.currentTarget.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+                inline: "nearest",
+              });
+            }}
             className={cn(
               "relative z-2 flex items-center rounded bg-transparent whitespace-nowrap focus:outline-none focus:ring-kumo-focus/50 focus-visible:ring-2 focus-visible:ring-kumo-brand",
               isOverflowing
