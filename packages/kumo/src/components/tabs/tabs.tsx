@@ -166,7 +166,7 @@ export function Tabs({
       className={cn(
         "relative isolate min-w-0 font-medium",
         isSegmented &&
-          (isSm ? "rounded-md" : "rounded-lg") + "ring ring-kumo-hairline/70",
+          (isSm ? "rounded-md" : "rounded-lg") + " ring ring-kumo-hairline/70",
         className,
       )}
       onValueChange={(nextValue) => {
