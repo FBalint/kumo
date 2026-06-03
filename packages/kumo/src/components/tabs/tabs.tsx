@@ -164,7 +164,8 @@ export function Tabs({
     <TabsPrimitive.Root
       {...rootProps}
       className={cn(
-        "relative isolate min-w-0 font-medium ring ring-kumo-hairline/70 rounded-lg",
+        "relative isolate min-w-0 font-medium",
+        isSegmented && "rounded-lg ring ring-kumo-hairline/70",
         className,
       )}
       onValueChange={(nextValue) => {
