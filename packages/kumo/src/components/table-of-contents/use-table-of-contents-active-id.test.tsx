@@ -1,5 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from "vite-plus/test";
 
 import { useTableOfContentsActiveId } from "./use-table-of-contents-active-id";
 
@@ -67,7 +74,9 @@ describe("useTableOfContentsActiveId", () => {
   });
 
   it("starts with no active section and observes nothing for empty ids", () => {
-    const { result } = renderHook(() => useTableOfContentsActiveId({ ids: [] }));
+    const { result } = renderHook(() =>
+      useTableOfContentsActiveId({ ids: [] }),
+    );
 
     expect(result.current.activeId).toBeNull();
     expect(MockIntersectionObserver.instances).toHaveLength(0);
@@ -77,7 +86,9 @@ describe("useTableOfContentsActiveId", () => {
     // Constructing the observer during render (rather than in an effect) was
     // the original sin that forced consumers to client:only. Renders must not
     // create observers — only the mount effect may.
-    const { result } = renderHook(() => useTableOfContentsActiveId({ ids: [] }));
+    const { result } = renderHook(() =>
+      useTableOfContentsActiveId({ ids: [] }),
+    );
     expect(result.current.activeId).toBeNull();
   });
 

@@ -66,7 +66,11 @@ export function clipboardTextVariants({
     // Base styles
     "flex items-center overflow-hidden bg-kumo-base px-0 font-mono",
     // Apply size styles from KUMO_CLIPBOARD_TEXT_VARIANTS
-    resolveVariant(KUMO_CLIPBOARD_TEXT_VARIANTS.size, size, KUMO_CLIPBOARD_TEXT_DEFAULT_VARIANTS.size).classes,
+    resolveVariant(
+      KUMO_CLIPBOARD_TEXT_VARIANTS.size,
+      size,
+      KUMO_CLIPBOARD_TEXT_DEFAULT_VARIANTS.size,
+    ).classes,
   );
 }
 
@@ -128,7 +132,7 @@ function AnchoredToasts() {
           <Toast.Root
             toast={toast}
             className={cn(
-              "flex origin-[var(--transform-origin)] flex-col rounded-md bg-kumo-base px-3 py-1.5 text-xs text-kumo-default font-sans",
+              "flex origin-[var(--transform-origin)] flex-col rounded-md bg-kumo-base px-3 py-1.5 font-sans text-xs text-kumo-default",
               "shadow-lg shadow-kumo-tip-shadow outline outline-kumo-fill",
             )}
           >
@@ -177,7 +181,11 @@ export const ClipboardText = forwardRef<HTMLDivElement, ClipboardTextProps>(
   ) => {
     const [copied, setCopied] = useState(false);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
-    const sizeConfig = resolveVariant(KUMO_CLIPBOARD_TEXT_VARIANTS.size, size, KUMO_CLIPBOARD_TEXT_DEFAULT_VARIANTS.size);
+    const sizeConfig = resolveVariant(
+      KUMO_CLIPBOARD_TEXT_VARIANTS.size,
+      size,
+      KUMO_CLIPBOARD_TEXT_DEFAULT_VARIANTS.size,
+    );
 
     // Destructure tooltip config with defaults
     const {
@@ -251,9 +259,9 @@ export const ClipboardText = forwardRef<HTMLDivElement, ClipboardTextProps>(
         size={sizeConfig.buttonSize}
         variant="ghost"
         className={cn(
-          "rounded-l-none rounded-r-[inherit] border-l! border-kumo-line! px-3 relative isolate overflow-hidden transition-all duration-200",
-          "focus:ring-inset focus:ring-kumo-focus/50",
-          "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-kumo-brand",
+          "relative isolate overflow-hidden rounded-l-none rounded-r-[inherit] border-l! border-kumo-line! px-3 transition-all duration-200",
+          "focus:ring-kumo-focus/50 focus:ring-inset",
+          "focus-visible:ring-2 focus-visible:ring-kumo-brand focus-visible:ring-inset",
         )}
         onClick={copyToClipboard}
         aria-label={copyAction}

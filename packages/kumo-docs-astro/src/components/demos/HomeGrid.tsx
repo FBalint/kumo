@@ -178,7 +178,10 @@ export function HomeGrid() {
       id: "toolbar",
       Component: (
         <Toolbar className="w-[260px]">
-          <Toolbar.Input aria-label="Search DNS records" placeholder="Search..." />
+          <Toolbar.Input
+            aria-label="Search DNS records"
+            placeholder="Search..."
+          />
           <Toolbar.Button icon={MagnifyingGlassIcon} aria-label="Search" />
           <Toolbar.Button icon={PlusIcon} aria-label="Add" />
         </Toolbar>
@@ -495,7 +498,7 @@ export function HomeGrid() {
       name: "DatePicker",
       id: "date-picker",
       Component: (
-        <div className="-m-4 scale-85">
+        <div className="scale-85 bg-kumo-base p-4">
           <DatePicker mode="single" />
         </div>
       ),
@@ -701,7 +704,7 @@ export function HomeGrid() {
                 {c.name}
               </span>
             )}
-            <div className="flex w-full items-center justify-center p-8 tracking-normal leading-normal">
+            <div className="flex w-full items-center justify-center p-8 leading-normal tracking-normal">
               {c.Component ?? (
                 <p className="text-base font-medium text-kumo-subtle">TBD</p>
               )}

@@ -128,12 +128,16 @@ const TableRoot = forwardRef<
 >(({ layout = "auto", ...props }, ref) => {
   const className = cn(
     "isolate w-full", // isolate creates a stacking context so z-0/z-1/z-2 never leak out
-    resolveVariant(KUMO_TABLE_VARIANTS.layout, layout, KUMO_TABLE_DEFAULT_VARIANTS.layout).classes,
+    resolveVariant(
+      KUMO_TABLE_VARIANTS.layout,
+      layout,
+      KUMO_TABLE_DEFAULT_VARIANTS.layout,
+    ).classes,
     "[&_td]:border-b [&_td]:border-kumo-fill [&_tr:last-child_td]:border-b-0", // Row border
     "[&_td]:p-3", // Cell padding
-    "[&_th]:border-b [&_th]:border-kumo-fill [&_th]:p-3 [&_th]:font-semibold [&_th]:text-base", // Header styles
+    "[&_th]:border-b [&_th]:border-kumo-fill [&_th]:p-3 [&_th]:text-base [&_th]:font-semibold", // Header styles
     "[&_th]:bg-kumo-base", // Header background color
-    "text-base text-left text-kumo-default",
+    "text-left text-base text-kumo-default",
     props.className,
   );
 
@@ -155,7 +159,7 @@ const TableHeader = forwardRef<
   const isCompact = variant === "compact";
   const className = cn(
     "group/header",
-    isCompact && "[&_th]:bg-kumo-elevated [&_th]:py-2 text-xs text-kumo-strong",
+    isCompact && "text-xs text-kumo-strong [&_th]:bg-kumo-elevated [&_th]:py-2",
     sticky && "[&_th]:sticky [&_th]:top-0 [&_th]:z-1",
     props.className,
   );
@@ -197,7 +201,11 @@ const TableRow = forwardRef<
   }
 >(({ variant = KUMO_TABLE_DEFAULT_VARIANTS.variant, ...props }, ref) => {
   const className = cn(
-    resolveVariant(KUMO_TABLE_VARIANTS.variant, variant, KUMO_TABLE_DEFAULT_VARIANTS.variant).classes,
+    resolveVariant(
+      KUMO_TABLE_VARIANTS.variant,
+      variant,
+      KUMO_TABLE_DEFAULT_VARIANTS.variant,
+    ).classes,
     props.className,
   );
 

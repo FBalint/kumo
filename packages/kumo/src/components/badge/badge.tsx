@@ -97,7 +97,8 @@ export const KUMO_BADGE_VARIANTS = {
   dotColor: {
     none: {
       classes: "",
-      description: "No dot indicator (used when appearance is not dot, or variant has no dot color)",
+      description:
+        "No dot indicator (used when appearance is not dot, or variant has no dot color)",
     },
     success: {
       classes: "bg-kumo-success",
@@ -238,7 +239,7 @@ export function Badge({
       {dotColor ? (
         <span
           aria-hidden="true"
-          className={cn("size-1.75 rounded-full shrink-0", dotColor)}
+          className={cn("size-1.75 shrink-0 rounded-full", dotColor)}
         />
       ) : null}
       {children}

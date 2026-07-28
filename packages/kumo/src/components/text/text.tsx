@@ -128,8 +128,16 @@ export function textVariants({
   size = KUMO_TEXT_DEFAULT_VARIANTS.size,
 }: KumoTextVariantsProps = {}) {
   return cn(
-    resolveVariant(KUMO_TEXT_VARIANTS.variant, variant, KUMO_TEXT_DEFAULT_VARIANTS.variant).classes,
-    resolveVariant(KUMO_TEXT_VARIANTS.size, size, KUMO_TEXT_DEFAULT_VARIANTS.size).classes,
+    resolveVariant(
+      KUMO_TEXT_VARIANTS.variant,
+      variant,
+      KUMO_TEXT_DEFAULT_VARIANTS.variant,
+    ).classes,
+    resolveVariant(
+      KUMO_TEXT_VARIANTS.size,
+      size,
+      KUMO_TEXT_DEFAULT_VARIANTS.size,
+    ).classes,
   );
 }
 
@@ -317,15 +325,25 @@ function _Text<Variant extends TextVariant = "body">(
       ref={ref as React.RefCallback<HTMLElement>}
       className={cn(
         "text-kumo-default",
-        resolveVariant(KUMO_TEXT_VARIANTS.variant, variant, KUMO_TEXT_DEFAULT_VARIANTS.variant).classes,
-        isCopy ? resolveVariant(KUMO_TEXT_VARIANTS.size, size, KUMO_TEXT_DEFAULT_VARIANTS.size).classes : "",
+        resolveVariant(
+          KUMO_TEXT_VARIANTS.variant,
+          variant,
+          KUMO_TEXT_DEFAULT_VARIANTS.variant,
+        ).classes,
+        isCopy
+          ? resolveVariant(
+              KUMO_TEXT_VARIANTS.size,
+              size,
+              KUMO_TEXT_DEFAULT_VARIANTS.size,
+            ).classes
+          : "",
         isCopy && bold ? "font-medium" : "",
         // Monospace fonts need to be 1pt smaller than body text to optically match
         isMono &&
           (size === "lg"
             ? KUMO_TEXT_VARIANTS.size.base.classes
             : KUMO_TEXT_VARIANTS.size.sm.classes),
-        truncate && "truncate min-w-0",
+        truncate && "min-w-0 truncate",
         DANGEROUS_className,
       )}
       style={DANGEROUS_style}

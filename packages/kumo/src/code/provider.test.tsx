@@ -1,9 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vite-plus/test";
 import { render, waitFor, screen } from "@testing-library/react";
 import { createHighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 import { ShikiProvider } from "./provider";
+import type { LanguageInput } from "./types";
 import { useShikiHighlighter } from "./use-shiki-highlighter";
 
 // ---------------------------------------------------------------------------
@@ -144,7 +145,9 @@ describe("ShikiProvider", () => {
     render(
       <ShikiProvider
         engine="javascript"
-        languages={["javascript", "rust", "typescript", "go"]}
+        languages={
+          ["javascript", "rust", "typescript", "go"] as LanguageInput[]
+        }
       >
         <div>child</div>
       </ShikiProvider>,
