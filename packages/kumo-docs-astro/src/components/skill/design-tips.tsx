@@ -133,7 +133,7 @@ export const designTips = [
       {
         variant: "good",
         exampleCode: `<Text as="h3" variant="heading">Account settings</Text>
-<Text as="strong" DANGEROUS_className="font-medium">required</Text>`,
+<Text as="strong" bold>required</Text>`,
         jsx: (
           <div className="grid gap-1">
             <Text as="h3" variant="heading">
@@ -141,7 +141,7 @@ export const designTips = [
             </Text>
             <Text>
               This action is{" "}
-              <Text as="strong" DANGEROUS_className="font-medium">
+              <Text as="strong" bold>
                 required
               </Text>
               .
@@ -235,7 +235,7 @@ export const designTips = [
         exampleCode: `<LayerCard className="px-5 py-4">...</LayerCard>`,
         jsx: (
           <LayerCard className="px-5 py-4">
-            <Text DANGEROUS_className="font-medium">Production</Text>
+            <Text bold>Production</Text>
           </LayerCard>
         ),
       },
@@ -244,7 +244,7 @@ export const designTips = [
         exampleCode: `<LayerCard className="p-5">...</LayerCard>`,
         jsx: (
           <LayerCard className="p-5">
-            <Text DANGEROUS_className="font-medium">Production</Text>
+            <Text bold>Production</Text>
           </LayerCard>
         ),
       },
@@ -438,7 +438,7 @@ export const designTips = [
         jsx: (
           <LayerCard className="h-56 w-full overflow-auto">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-kumo-line bg-kumo-base px-3 py-2">
-              <Text DANGEROUS_className="font-medium">API tokens</Text>
+              <Text bold>API tokens</Text>
               <Button size="sm">Create</Button>
             </div>
             <div className="grid gap-4 p-3">
@@ -462,7 +462,7 @@ export const designTips = [
         jsx: (
           <LayerCard className="h-56 w-full overflow-auto">
             <div className="sticky top-0 z-10 flex items-center justify-between bg-kumo-base px-3 py-2">
-              <Text DANGEROUS_className="font-medium">API tokens</Text>
+              <Text bold>API tokens</Text>
               <Button size="sm">Create</Button>
             </div>
             <div className="grid gap-4 p-3">
@@ -517,19 +517,19 @@ export const designTips = [
         jsx: (
           <div className="grid w-full">
             <div className="flex h-10 items-center">
-              <Text as="h3" DANGEROUS_className="font-medium">
+              <Text as="h3" variant="heading">
                 Recent Requests
               </Text>
             </div>
             <LayerCard>
               <LayerCard.Secondary className="grid h-12 grid-cols-3 items-center gap-4 px-3 py-0">
-                <Text size="sm" DANGEROUS_className="font-medium">
+                <Text size="sm" bold>
                   Time
                 </Text>
-                <Text size="sm" DANGEROUS_className="font-medium">
+                <Text size="sm" bold>
                   Status
                 </Text>
-                <Text size="sm" DANGEROUS_className="font-medium">
+                <Text size="sm" bold>
                   Query
                 </Text>
               </LayerCard.Secondary>
@@ -553,15 +553,15 @@ export const designTips = [
         jsx: (
           <LayerCard className="w-full">
             <div className="flex h-10 items-center px-3">
-              <Text as="h3" DANGEROUS_className="font-medium">
+              <Text as="h3" variant="heading">
                 Recent Requests
               </Text>
             </div>
             <LayerCard>
               <LayerCard.Secondary className="grid h-12 grid-cols-3 gap-4 px-3 py-0">
-                <Text DANGEROUS_className="font-medium">Time</Text>
-                <Text DANGEROUS_className="font-medium">Status</Text>
-                <Text DANGEROUS_className="font-medium">Query</Text>
+                <Text bold>Time</Text>
+                <Text bold>Status</Text>
+                <Text bold>Query</Text>
               </LayerCard.Secondary>
               <LayerCard.Primary className="grid h-10 grid-cols-3 items-center gap-4 px-3 py-0">
                 <Text>00:50 UTC</Text>
