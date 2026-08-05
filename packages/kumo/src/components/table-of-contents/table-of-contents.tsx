@@ -138,7 +138,7 @@ export interface TableOfContentsGroupProps extends Omit<
 }
 
 const NESTED_UL_CLASSES =
-  "flex flex-col gap-2 border-l-2 border-kumo-line [&>li>a]:pl-7 [&>li>button]:pl-7";
+  "flex flex-col gap-2 border-l-2 border-transparent [&>li>a]:pl-7 [&>li>button]:pl-7";
 
 const TableOfContentsGroup = forwardRef<
   HTMLLIElement,
