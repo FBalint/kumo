@@ -1,5 +1,40 @@
 # @cloudflare/kumo
 
+## 2.11.0
+
+### Minor Changes
+
+- aa6edff: Add icon support to filled Badge variants through the `icon` prop, add linked-badge hover styles, and use the base surface background for outline badges.
+
+### Patch Changes
+
+- bba0f5e: Allow users to select and copy LinkButton text while preserving Button text selection behavior.
+- c2c8d42: Update Table rows to use borderless, alternating background styling.
+- 0ad1926: Fix hydration mismatch in the Sidebar's `useIsMobile` hook on SSR frameworks like Next.js. The hook now uses `useSyncExternalStore` with a desktop `getServerSnapshot`, so the server-rendered HTML (desktop `<aside>`) hydrates cleanly on mobile viewports before switching to the mobile overlay.
+
+## 2.10.0
+
+### Minor Changes
+
+- 4b9a4dc: Allow Select and Combobox triggers to compose directly with `Toolbar.Button` and `Toolbar.Input` through their `render` props, adding grouped styling and arrow-key focus management while preserving regular `Select.*` and `Combobox.*` APIs.
+
+  Deprecate Toolbar's configurable `size` prop and size metadata exports. They remain functional for compatibility; omitting `size` continues to use the base size.
+
+### Patch Changes
+
+- 65db2e6: Forward link-specific props in Tabs and Sidebar so link-rendered tabs can opt out of native button semantics, and Sidebar link buttons preserve attributes like `aria-current`.
+- 0c58325: Expose all positioner props on Combobox.Content (`anchor`, `positionMethod`, `collisionAvoidance`, `collisionBoundary`, `collisionPadding`, `sticky`, `disableAnchorTracking`).
+- 528d5ff: Populate InputArea props in component registry so the docs API reference table renders correctly
+- 75c3b14: Fix Sidebar peeking state during SlidingViews transitions.
+- 1d9b588: Fix Tabs overflow controls when tabs are removed and the remaining tabs fit.
+
+## 2.9.2
+
+### Patch Changes
+
+- 188a82c: Remove the elevated chip styling from Tabs overflow scroll controls.
+- c5ad709: Constrain Tabs overflow controls to segmented tabs and focus the caret target.
+
 ## 2.9.1
 
 ### Patch Changes
